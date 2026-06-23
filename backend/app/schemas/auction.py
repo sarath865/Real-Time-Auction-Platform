@@ -29,6 +29,7 @@ class AuctionResponse(BaseModel):
     current_price: float
     category: str
     status: str
+    owner_id: int
 
     class Config:
         from_attributes = True

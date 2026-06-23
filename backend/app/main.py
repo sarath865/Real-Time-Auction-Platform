@@ -4,23 +4,26 @@ from app.core.database import Base, engine
 
 from app.models.user import User
 from app.models.auction import Auction
+from app.models.bid import Bid
 
 from app.routes.auth import router as auth_router
+from app.routes.auctions import router as auction_router
+from app.routes.bids import router as bid_router
+
+
+print(Base.metadata.tables.keys())
 
 app = FastAPI(
-    title="Real-Time Auction Platform",
-    version="1.0.0"
+    title="Real-Time Auction Platform"
 )
 
-# TEMPORARY FOR DEVELOPMENT ONLY
-Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
+app.include_router(auction_router)
+app.include_router(bid_router)
 
 
 @app.get("/")
 def home():
-    return {
-        "message": "Real-Time Auction Platform API Running"
-    }
+    return {"message": "API Running"}

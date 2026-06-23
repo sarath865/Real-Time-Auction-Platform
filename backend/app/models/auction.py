@@ -1,4 +1,13 @@
-from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    Text,
+    DateTime,
+    ForeignKey
+)
+
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -28,6 +37,15 @@ class Auction(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    owner = relationship("User", back_populates="auctions")
+    owner = relationship(
+        "User",
+        back_populates="auctions"
+    )
+    
+    bids = relationship(
+    "Bid",
+    back_populates="auction",
+    cascade="all, delete-orphan"
+)
