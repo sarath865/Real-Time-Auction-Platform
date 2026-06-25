@@ -35,17 +35,42 @@ class Auction(Base):
 
     status = Column(String(30), default="ACTIVE")
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now()
+    )
 
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    # NEW FIELDS
+    winner_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
+
+    winning_bid = Column(
+        Float,
+        nullable=True
+    )
 
     owner = relationship(
         "User",
+        foreign_keys=[owner_id],
         back_populates="auctions"
     )
-    
+
+    winner = relationship(
+        "User",
+        foreign_keys=[winner_id]
+    )
+
     bids = relationship(
-    "Bid",
-    back_populates="auction",
-    cascade="all, delete-orphan"
-)
+        "Bid",
+        back_populates="auction",
+        cascade="all, delete-orphan"
+    )

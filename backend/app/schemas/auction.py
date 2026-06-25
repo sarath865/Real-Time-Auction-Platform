@@ -1,5 +1,5 @@
-from datetime import datetime
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class AuctionCreate(BaseModel):
@@ -21,6 +21,10 @@ class AuctionUpdate(BaseModel):
     status: str
 
 
+class AuctionUpdateStatus(BaseModel):
+    status: str
+
+
 class AuctionResponse(BaseModel):
     id: int
     title: str
@@ -30,6 +34,10 @@ class AuctionResponse(BaseModel):
     category: str
     status: str
     owner_id: int
+
+    # Winner Information
+    winner_id: int | None = None
+    winning_bid: float | None = None
 
     class Config:
         from_attributes = True

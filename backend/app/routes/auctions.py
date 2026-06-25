@@ -5,11 +5,13 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 
 from app.models.auction import Auction
+from app.models.bid import Bid
 from app.models.user import User
 
 from app.schemas.auction import (
     AuctionCreate,
     AuctionUpdate,
+    AuctionUpdateStatus,
     AuctionResponse
 )
 
@@ -45,9 +47,7 @@ def create_auction(
 
 
 @router.get("", response_model=list[AuctionResponse])
-def get_auctions(
-    db: Session = Depends(get_db)
-):
+def get_auctions(db: Session = Depends(get_db)):
     return db.query(Auction).all()
 
 
@@ -101,6 +101,48 @@ def update_auction(
     auction.start_time = auction_data.start_time
     auction.end_time = auction_data.end_time
     auction.status = auction_data.status
+
+    db.commit()
+    db.refresh(auction)
+
+    return auction
+
+
+@router.patch("/{auction_id}/close", response_model=AuctionResponse)
+def close_auction(
+    auction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+
+    auction = db.query(Auction).filter(
+        Auction.id == auction_id
+    ).first()
+
+    if not auction:
+        raise HTTPException(
+            status_code=404,
+            detail="Auction not found"
+        )
+
+    if auction.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized"
+        )
+
+    highest_bid = (
+        db.query(Bid)
+        .filter(Bid.auction_id == auction.id)
+        .order_by(Bid.bid_amount.desc())
+        .first()
+    )
+
+    auction.status = "ENDED"
+
+    if highest_bid:
+        auction.winner_id = highest_bid.user_id
+        auction.winning_bid = highest_bid.bid_amount
 
     db.commit()
     db.refresh(auction)
