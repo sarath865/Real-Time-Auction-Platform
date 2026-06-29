@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 
@@ -17,8 +18,22 @@ app = FastAPI(
     title="Real-Time Auction Platform"
 )
 
+# Create database tables
 Base.metadata.create_all(bind=engine)
 
+# CORS Configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routes
 app.include_router(auth_router)
 app.include_router(auction_router)
 app.include_router(bid_router)
@@ -26,4 +41,6 @@ app.include_router(bid_router)
 
 @app.get("/")
 def home():
-    return {"message": "API Running"}
+    return {
+        "message": "API Running"
+    }
